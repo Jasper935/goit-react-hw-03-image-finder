@@ -18,6 +18,35 @@ export class App extends Component {
     imgForModal: '',
   };
 
+  getSearch = s => {
+    this.setState({ search: s });
+  };
+
+  componentDidUpdate = (prProps, prevState) => {
+    const { search, page } = this.state;
+    if (prevState.search !== search) {
+      this.setState({ loader: true });
+      fetchByName(search, page)
+        .then(res => {
+          if (res.data.hits.length === 0 || search.trim() === '') {
+            toast.warning('Enter correct value');
+            return;
+          }
+          this.setState(prSt => ({
+            gallery: [...res.data.hits],
+            page: prSt.page++,
+            totalHits: res.data.totalHits,
+          }));
+        })
+        .finally(() => this.setState({ loader: false }));
+    }
+  };
+  openModal = img => {
+    this.setState({
+      imgForModal: img,
+      modalIsOpen: true,
+    });
+  };
   onClick = () => {
     const { search, page } = this.state;
     fetchByName(search, page + 1).then(res =>
@@ -27,52 +56,10 @@ export class App extends Component {
       }))
     );
   };
-
-  onSubmit = evt => {
-    evt.preventDefault();
-    const { search, page } = this.state;
-    this.setState({ loader: true });
-    fetchByName(search, page)
-      .then(res => {
-        if (res.data.hits.length === 0 || search.trim() === '') {
-          toast.warning('Enter correct value');
-          return;
-        }
-        this.setState(prSt => ({
-          gallery: [...res.data.hits],
-          page: prSt.page++,
-          totalHits: res.data.totalHits,
-        }));
-      })
-      .finally(() => this.setState({ loader: false }));
-  };
-
-  onInput = evt => {
+  getModalStatus = status => {
     this.setState({
-      search: evt.currentTarget.value,
+      modalIsOpen: status,
     });
-  };
-  openModal = img => {
-    window.addEventListener('keydown', this.onKeyDown);
-    this.setState({
-      imgForModal: img,
-      modalIsOpen: true,
-    });
-  };
-  onClickModal = evt => {
-    if (evt.currentTarget === evt.target) {
-      this.setState({
-        modalIsOpen: false,
-      });
-    }
-  };
-  onKeyDown = evt => {
-    if (evt.code === 'Escape') {
-      this.setState({
-        modalIsOpen: false,
-      });
-    }
-    window.removeEventListener('keydown', this.onKeyDown);
   };
 
   render() {
@@ -87,14 +74,16 @@ export class App extends Component {
     } = this.state;
     return (
       <>
-        <Searchbar
-          onSubmit={this.onSubmit}
-          value={search}
-          onInput={this.onInput}
-        />
+        <Searchbar value={search} getSearch={this.getSearch} />
         {loader && <Loader />}
         <ToastContainer />
-        {modalIsOpen && <Modal onClick={this.onClickModal} img={imgForModal} />}
+        {modalIsOpen && (
+          <Modal
+            onClick={this.onClickModal}
+            img={imgForModal}
+            getModalStatus={this.getModalStatus}
+          />
+        )}
         {gallery.length > 0 && (
           <ImageGallery
             gallery={gallery}
