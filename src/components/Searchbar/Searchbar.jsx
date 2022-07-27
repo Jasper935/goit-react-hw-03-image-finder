@@ -6,13 +6,11 @@ export class Searchbar extends Component {
     search: '',
   };
 
-  handlerSearch = search => {
-    this.setState({ search });
-  };
-
   onSubmit = evt => {
     evt.preventDefault();
     this.props.getSearch(this.state.search);
+    this.props.getFirstPage();
+    this.setState({ search: '' });
   };
 
   onInput = evt => {
@@ -31,7 +29,7 @@ export class Searchbar extends Component {
 
           <input
             name="search"
-            
+            value={this.state.search}
             className={style.SearchFormInput}
             onInput={this.onInput}
             type="text"
@@ -46,5 +44,5 @@ export class Searchbar extends Component {
 }
 Searchbar.propTypes = {
   getSearch: PropTypes.func.isRequired,
-  
+  getFirstPage: PropTypes.func.isRequired,
 };

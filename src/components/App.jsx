@@ -14,12 +14,7 @@ export class App extends Component {
     page: 1,
     search: '',
     totalHits: 0,
-    modalIsOpen: false,
     imgForModal: '',
-  };
-
-  getSearch = s => {
-    this.setState({ search: s });
   };
 
   componentDidUpdate = (prProps, prevState) => {
@@ -34,17 +29,25 @@ export class App extends Component {
           }
           this.setState(prSt => ({
             gallery: [...res.data.hits],
-            page: prSt.page++,
+
             totalHits: res.data.totalHits,
           }));
         })
         .finally(() => this.setState({ loader: false }));
     }
   };
+  getFirstPage = () => {
+    this.setState({
+      page: 1,
+    });
+  };
+  getSearch = s => {
+    this.setState({ search: s });
+  };
+
   openModal = img => {
     this.setState({
       imgForModal: img,
-      modalIsOpen: true,
     });
   };
   onClick = () => {
@@ -56,41 +59,20 @@ export class App extends Component {
       }))
     );
   };
-  getModalStatus = status => {
-    this.setState({
-      modalIsOpen: status,
-    });
-  };
 
   render() {
-    const {
-      search,
-      page,
-      gallery,
-      totalHits,
-      loader,
-      modalIsOpen,
-      imgForModal,
-    } = this.state;
+    const { page, gallery, totalHits, loader, imgForModal } = this.state;
     return (
       <>
-        <Searchbar value={search} getSearch={this.getSearch} />
+        <Searchbar
+          getSearch={this.getSearch}
+          getFirstPage={this.getFirstPage}
+        />
         {loader && <Loader />}
         <ToastContainer />
-        {modalIsOpen && (
-          <Modal
-            onClick={this.onClickModal}
-            img={imgForModal}
-            getModalStatus={this.getModalStatus}
-          />
-        )}
+        {imgForModal && <Modal img={imgForModal} openModal={this.openModal} />}
         {gallery.length > 0 && (
-          <ImageGallery
-            gallery={gallery}
-            onClick={this.onClick}
-            totalHits={totalHits}
-            openModal={this.openModal}
-          />
+          <ImageGallery gallery={gallery} openModal={this.openModal} />
         )}
         {totalHits >= 12 * page && gallery.length > 0 && (
           <Button onClick={this.onClick} />

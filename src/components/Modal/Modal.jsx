@@ -2,10 +2,6 @@ import style from '../Modal/Modal.module.css';
 import PropTypes from 'prop-types';
 import { Component } from 'react';
 export class Modal extends Component {
-  state = {
-    modalIsOpen: false,
-    imgForModal: '',
-  };
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown);
   }
@@ -14,13 +10,13 @@ export class Modal extends Component {
   }
   onClick = evt => {
     if (evt.currentTarget === evt.target) {
-      this.props.getModalStatus(this.state.modalIsOpen);
+      this.props.openModal(false);
     }
   };
 
   onKeyDown = evt => {
     if (evt.code === 'Escape') {
-      this.props.getModalStatus(this.state.modalIsOpen);
+      this.props.openModal(false);
     }
   };
 
@@ -43,5 +39,5 @@ export class Modal extends Component {
 
 Modal.propTypes = {
   img: PropTypes.string.isRequired,
-  getModalStatus: PropTypes.func.isRequired,
+  openModal: PropTypes.func.isRequired,
 };
